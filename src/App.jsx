@@ -22,13 +22,13 @@ const App = () => {
     restaurant: new Icon({ iconUrl: "/restaurant.png", iconSize: [40, 40] }),
     hotel: new Icon({ iconUrl: "/hotel.png", iconSize: [40, 40] }),
     atm: new Icon({ iconUrl: "/atm.png", iconSize: [40, 40] }),
-    bank: new Icon({ iconUrl: "/marker.png", iconSize: [40, 40] }),
+    bank: new Icon({ iconUrl: "/bank.png", iconSize: [40, 40] }),
     library: new Icon({ iconUrl: "/library.png", iconSize: [40, 40] }),
     cafe: new Icon({ iconUrl: "/cafe.png", iconSize: [40, 40] }),
     parking: new Icon({ iconUrl: "/parking.png", iconSize: [40, 40] }),
     cinema: new Icon({ iconUrl: "/cinema.png", iconSize: [40, 40] }),
     pharmacy: new Icon({ iconUrl: "/pharmacy.png", iconSize: [40, 40] }),
-
+    mall: new Icon({ iconUrl: "/mall.png", iconSize: [40, 40] }),
     default: new Icon({ iconUrl: "/marker.png", iconSize: [40, 40] }),
   };
 
@@ -67,28 +67,57 @@ const App = () => {
     fetchNearbyPlaces(latitude, longitude);
   };
 
+  // const fetchNearbyPlaces = async (latitude, longitude) => {
+
+  //   if (!amenityType) return; // Skip fetching if no amenity type is selected
+
+  //   try {
+  //     const response = await axios.get(
+  //       `https://overpass-api.de/api/interpreter?data=[out:json];node(around:2000,${latitude},${longitude})[amenity=${amenityType}];out;`
+  //     );
+
+  //     const places = response.data.elements.map((place) => ({
+  //       name: place.tags.name,
+  //       lat: place.lat,
+  //       lon: place.lon,
+  //       type: place.tags.amenity,
+  //     }));
+
+  //     setNearbyPlaces(places);
+  //   } catch (error) {
+  //     console.error("Error fetching nearby places:", error);
+  //   }
+
+  // };
+  
   const fetchNearbyPlaces = async (latitude, longitude) => {
-
-    if (!amenityType) return; // Skip fetching if no amenity type is selected
-
+    if (!amenityType) return;
+  
+    const amenityMapping = {
+      "mall": "shop=mall",
+      hotels: "tourism=hotel",
+    };
+  
+    const queryTag = amenityMapping[amenityType] || `amenity=${amenityType}`;
+  
     try {
       const response = await axios.get(
-        `https://overpass-api.de/api/interpreter?data=[out:json];node(around:2000,${latitude},${longitude})[amenity=${amenityType}];out;`
+        `https://overpass-api.de/api/interpreter?data=[out:json];node(around:2000,${latitude},${longitude})[${queryTag}];out;`
       );
-
+  
       const places = response.data.elements.map((place) => ({
-        name: place.tags.name,
+        name: place.tags.name || "Unnamed",
         lat: place.lat,
         lon: place.lon,
-        type: place.tags.amenity,
+        type: place.tags.amenity || place.tags.shop || place.tags.tourism,
       }));
-
+  
       setNearbyPlaces(places);
     } catch (error) {
       console.error("Error fetching nearby places:", error);
     }
-
   };
+  
 
   const UpdateMapCenter = () => {
 
@@ -131,7 +160,7 @@ const App = () => {
             <option value="library">Library</option>
             <option value="cafe">Cafe</option>
             <option value="parking">Parking</option>
-            <option value="hotel">Hotel</option>
+            <option value="hotels">Hotel</option>
             <option value="cinema">Cinema</option>
           </select>
           {suggestions.length > 0 && (
