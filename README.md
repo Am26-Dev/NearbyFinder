@@ -1,4 +1,4 @@
-#NearbyFinder
+# NearbyFinder
 A React-based web application that allows users to find nearby places, such as hospitals, based on their entered city or locality.
 
 
